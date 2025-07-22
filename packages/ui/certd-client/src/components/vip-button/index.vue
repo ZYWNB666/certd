@@ -280,6 +280,10 @@ function openUpgrade() {
     },
   };
 
+  const productListUrl = computed(() => {
+    return `http://localhost:1017/subject/#/product/list?appKey=${settingStore.installInfo.appKey}&subjectId=${settingStore.installInfo.siteId}`;
+  });
+
   const modalRef = modal.confirm({
     title,
     async onOk() {
