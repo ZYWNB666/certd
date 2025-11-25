@@ -1,5 +1,7 @@
 // Mock version of @certd/commercial-core to bypass Suite/Commercial verification
 
+import { Configuration as MidwayConfiguration } from '@midwayjs/core';
+
 // ========================================
 // Entity Definitions
 // ========================================
@@ -104,7 +106,11 @@ export class UserSuiteService {
 
 // 使用计数服务接口
 export interface IUsedCountService {
-  getUsedCount(userId: number): Promise<number>;
+  getUsedCount(userId: number): Promise<{
+    pipelineCountUsed: number;
+    domainCountUsed: number;
+    monitorCountUsed: number;
+  }>;
 }
 
 // ========================================
@@ -115,6 +121,22 @@ export const commercialEntities = [
   // 返回空数组，因为我们不需要实际的数据库实体
   // 或者可以返回 Mock 实体（但通常不需要）
 ];
+
+// ========================================
+// Configuration (for Midway Framework)
+// ========================================
+
+@MidwayConfiguration({
+  namespace: 'commercial-core',
+})
+export class CommercialCoreConfiguration {
+  async onReady() {
+    console.log('[MOCK Commercial] Commercial Core Mock module loaded - all limitations bypassed');
+  }
+}
+
+// Export Configuration as the default export name that Midway expects
+export { CommercialCoreConfiguration as Configuration };
 
 // ========================================
 // Export Everything
