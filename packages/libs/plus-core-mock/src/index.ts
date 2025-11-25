@@ -179,6 +179,11 @@ export class PlusRequestService {
   async request(config: any): Promise<any> {
     console.log('[MOCK] Request:', config.url);
     
+    // Handle email sending with custom API
+    if (config.url?.includes('/emailSend')) {
+      return await this.sendEmailViaCustomAPI(config.data);
+    }
+    
     // Handle different request types
     if (config.url?.includes('/vip/trialGet')) {
       return {
@@ -192,6 +197,49 @@ export class PlusRequestService {
       data: {},
       message: 'Mock request successful',
     };
+  }
+
+  // Send email via custom API
+  private async sendEmailViaCustomAPI(emailData: any): Promise<any> {
+    try {
+      // Prepare email content
+      const htmlContent = emailData.html || emailData.text || '';
+      const mailList = Array.isArray(emailData.to) ? emailData.to.join(',') : emailData.to;
+      
+      // Custom API configuration
+      const apiUrl = 'https://mail.netwebs.top/send';
+      const token = 'token-0hfgh80cb58e388fac923965hib0';
+      
+      // Prepare form data
+      const formData = new URLSearchParams();
+      formData.append('mail', mailList);
+      formData.append('subject', emailData.subject);
+      formData.append('html_content', htmlContent);
+      
+      console.log('[MOCK] Sending email via custom API:', { to: mailList, subject: emailData.subject });
+      
+      // Send request to custom API using built-in fetch (Node.js 18+)
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      });
+      
+      const result = await response.text();
+      console.log('[MOCK] Email sent successfully:', result);
+      
+      return {
+        code: 0,
+        data: { success: true },
+        message: 'Email sent via custom API',
+      };
+    } catch (error: any) {
+      console.error('[MOCK] Failed to send email:', error.message);
+      throw new Error(`邮件发送失败: ${error.message}`);
+    }
   }
 
   // Mock requestWithoutSign method

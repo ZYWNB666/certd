@@ -12,21 +12,26 @@ COPY . /workspace/
 RUN npm install -g pnpm
 
 # ==========================================
-# 关键步骤：应用 VIP 破解
+# 关键步骤：应用 VIP + Commercial 破解
 # ==========================================
 # 1. 修复 package.json 的 overrides 配置
-RUN sed -i 's/"@certd\/plus-core": "workspace:packages\/libs\/plus-core-mock"/"@certd\/plus-core": "workspace:*"/g' /workspace/package.json
+RUN sed -i 's/"@certd\/plus-core": "workspace:packages\/libs\/plus-core-mock"/"@certd\/plus-core": "workspace:*"/g' /workspace/package.json && \
+    sed -i 's/"@certd\/commercial-core": "workspace:packages\/libs\/commercial-core-mock"/"@certd\/commercial-core": "workspace:*"/g' /workspace/package.json
 
-# 2. 编译 Mock 模块
+# 2. 编译 plus-core-mock 模块
 WORKDIR /workspace/packages/libs/plus-core-mock
 RUN npm install --legacy-peer-deps && npx tsc
 
-# 3. 清理并重新安装依赖（应用 Mock 替换）
+# 3. 编译 commercial-core-mock 模块
+WORKDIR /workspace/packages/libs/commercial-core-mock
+RUN npm install --legacy-peer-deps && npx tsc
+
+# 4. 清理并重新安装依赖（应用 Mock 替换）
 WORKDIR /workspace/
 RUN rm -rf node_modules pnpm-lock.yaml
 RUN pnpm install
 
-# 4. 构建整个项目
+# 5. 构建整个项目
 RUN pnpm run init
 
 # ==========================================
