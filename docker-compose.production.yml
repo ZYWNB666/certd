@@ -17,7 +17,7 @@ services:
     # ==========================================
     volumes:
       # 数据目录（证书、数据库等）
-      - ./data:/app/data
+      - ./data:/app/packages/ui/certd-server/data
       # 如果时间不准，取消注释以下两行
       # - /etc/localtime:/etc/localtime:ro
       # - /etc/timezone:/etc/timezone:ro
