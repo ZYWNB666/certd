@@ -49,6 +49,10 @@
     "packages/**"
   ],
   "pnpm": {
-    "neverBuiltDependencies": []
+    "neverBuiltDependencies": [],
+    "overrides": {
+      "@certd/plus-core": "workspace:*"
+    }
   }
 }
+

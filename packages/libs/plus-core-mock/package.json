@@ -1,0 +1,20 @@
+{
+  "name": "@certd/plus-core",
+  "version": "1.37.10",
+  "description": "Mock version for bypassing VIP verification",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "npx tsc",
+    "test": "node test.mjs",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.2",
+    "@types/node": "^18.0.0"
+  },
+  "dependencies": {}
+}
+

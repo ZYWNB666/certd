@@ -1,0 +1,145 @@
+version: '3.8'
+
+services:
+  certd:
+    # 使用本地构建的镜像
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    # 或者使用已构建的镜像（需要先 docker build -t certd-vip:latest -f Dockerfile.production .）
+    # image: certd-vip:latest
+    
+    container_name: certd-vip
+    restart: unless-stopped
+    
+    # ==========================================
+    # 数据持久化
+    # ==========================================
+    volumes:
+      # 数据目录（证书、数据库等）
+      - ./data:/app/data
+      # 如果时间不准，取消注释以下两行
+      # - /etc/localtime:/etc/localtime:ro
+      # - /etc/timezone:/etc/timezone:ro
+    
+    # ==========================================
+    # 端口映射
+    # ==========================================
+    ports:
+      - "7001:7001"  # HTTP
+      - "7002:7002"  # HTTPS
+    
+    # ==========================================
+    # 环境变量配置
+    # ==========================================
+    environment:
+      # 时区
+      - TZ=Asia/Shanghai
+      
+      # 主机名（支持IPv6改为::）
+      - certd_koa_hostname=0.0.0.0
+      
+      # 重置管理员密码（首次启动后记得改回false）
+      - certd_system_resetAdminPasswd=false
+      
+      # ==========================================
+      # 可选：数据库配置（默认使用SQLite）
+      # ==========================================
+      # PostgreSQL 配置
+      # - certd_flyway_scriptDir=./db/migration-pg
+      # - certd_typeorm_dataSource_default_type=postgres
+      # - certd_typeorm_dataSource_default_host=postgres
+      # - certd_typeorm_dataSource_default_port=5432
+      # - certd_typeorm_dataSource_default_username=certd
+      # - certd_typeorm_dataSource_default_password=your_secure_password
+      # - certd_typeorm_dataSource_default_database=certd
+      
+      # MySQL 配置
+      # - certd_flyway_scriptDir=./db/migration-mysql
+      # - certd_typeorm_dataSource_default_type=mysql
+      # - certd_typeorm_dataSource_default_host=mysql
+      # - certd_typeorm_dataSource_default_port=3306
+      # - certd_typeorm_dataSource_default_username=certd
+      # - certd_typeorm_dataSource_default_password=your_secure_password
+      # - certd_typeorm_dataSource_default_database=certd
+    
+    # ==========================================
+    # DNS 配置（如果遇到网络问题）
+    # ==========================================
+    # dns:
+    #   - 223.5.5.5      # 阿里云DNS
+    #   - 223.6.6.6
+    #   - 119.29.29.29   # 腾讯云DNS
+    #   - 8.8.8.8        # Google DNS
+    
+    # ==========================================
+    # 健康检查
+    # ==========================================
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:7001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # ==========================================
+    # 资源限制
+    # ==========================================
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    # ==========================================
+    # 日志配置
+    # ==========================================
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# ==========================================
+# 可选：外部数据库服务
+# ==========================================
+# 取消注释以下部分来使用独立的数据库服务
+
+#   postgres:
+#     image: postgres:16-alpine
+#     container_name: certd-postgres
+#     restart: unless-stopped
+#     environment:
+#       - POSTGRES_USER=certd
+#       - POSTGRES_PASSWORD=your_secure_password
+#       - POSTGRES_DB=certd
+#     volumes:
+#       - ./postgres-data:/var/lib/postgresql/data
+#     ports:
+#       - "5432:5432"
+
+#   mysql:
+#     image: mysql:8.0
+#     container_name: certd-mysql
+#     restart: unless-stopped
+#     environment:
+#       - MYSQL_ROOT_PASSWORD=root_password
+#       - MYSQL_DATABASE=certd
+#       - MYSQL_USER=certd
+#       - MYSQL_PASSWORD=your_secure_password
+#     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
+#     volumes:
+#       - ./mysql-data:/var/lib/mysql
+#     ports:
+#       - "3306:3306"
+
+# ==========================================
+# 网络配置
+# ==========================================
+# networks:
+#   default:
+#     name: certd-network
+
